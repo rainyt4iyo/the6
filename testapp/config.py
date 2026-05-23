@@ -1,5 +1,5 @@
 import os
-DEBUG = False
+DEBUG = True
 
 '''class Config:
     DEBUG = False

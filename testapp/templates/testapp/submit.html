@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Submit</title>
+</head>
+<body>
+    <!-- 画面上部に戻るボタン -->
+    <div>
+        <button type="button" onclick="history.back()">戻る</button>
+    </div>
+
+    <hr>
+
+    <h3>Result Submit</h3>
+    <!-- route関数から渡されたplayerの情報を表示（確認用） -->
+    <p>Name: {{ player.name }} (ID: {{ player.pid }}, Class: {{ player.class }})</p>
+
+    <!-- POSTで情報が送信されるフォーム -->
+    <form method="POST">
+        <!-- バックエンド側で request.form['kid'] を受け取るため用意 -->
+        <div>
+            <label>KID: <input type="text" name="kid" required></label>
+        </div>
+        <br>
+
+        <!-- ZとTのチェックボックス -->
+        <div>
+            {%if result and result.zt >= 1%}
+            <label><input type="checkbox" name="zt" id="check_z" value="Z" checked> Z</label>
+            {%else%}
+            <label><input type="checkbox" name="zt" id="check_z" value="Z"> Z</label>
+            {%endif%}
+        </div>
+        <div>
+            {%if result and result.zt == 2%}
+            <label><input type="checkbox" name="zt" id="check_t" value="T" checked> T</label>
+            {%else%}
+            <label><input type="checkbox" name="zt" id="check_t" value="T"> T</label>
+            {%endif%}
+        </div>
+        <br>
+        <button type="submit">送信</button>
+    </form>
+
+    <!-- Tを押すとZにもチェックを入れるJavaScript -->
+    <script>
+        const checkZ = document.getElementById('check_z');
+        const checkT = document.getElementById('check_t');
+
+        checkT.addEventListener('change', function() {
+            // Tのチェックボックスにチェックが入った場合、Zもチェックする
+            if (this.checked) {
+                checkZ.checked = true;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User=gyate
-WorkingDirectory=/home/gyate/the1
+WorkingDirectory=/home/gyate/the6
 Environment="PATH=/home/gyate/venv"
 ExecStart=/home/gyate/venv/binpython server.py
 Restart=always

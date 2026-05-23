@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <title>THE|6</title>
+</head>
+<body>
+    <div class="container">
+        <br>
+        <h3>Player Check (Grade {{ grade }})</h3>
+        <div class="table-wrapper">
+            {% for players in player_list %}
+            <p>{{ grade_list[loop.index0] }}</p>
+            <table class="player-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player in players %}
+                    <tr>
+                        <button class="white_button" onclick="location.href='/submit/{{ player.class }}/{{ player.pid }}'">{{ player.pid}}: {{ player.name }}</button>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3">プレイヤーがいません</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
