@@ -34,20 +34,12 @@ CREATE TABLE IF NOT EXISTS result (
     class VARCHAR(255), 
     kid VARCHAR(255), 
     zt INT,
-    UNIQUE(pid, class)
+    UNIQUE(pid, class, kid)
 )
 """
 cursor.execute(sql)
 conn.commit()
 
-sql = """
-CREATE TABLE IF NOT EXISTS kadai (
-    kid INT UNIQUE, 
-    class VARCHAR(255), 
-    area VARCHAR(255),
-"""
-cursor.execute(sql)
-conn.commit()
 
 print("--------------------------------------")
 print("[DB] > 初期化完了")

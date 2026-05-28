@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <br>
-        <h3>Player Check (Grade {{ grade }})</h3>
+        <h3>Player Check ({{ area }}) (Grade {{ grade }})</h3>
         <div class="table-wrapper">
             {% for players in player_list %}
             <p>{{ grade_list[loop.index0] }}</p>
@@ -24,7 +24,7 @@
                 <tbody>
                     {% for player in players %}
                     <tr>
-                        <button class="white_button" onclick="location.href='/submit/{{ player.class }}/{{ player.pid }}'">{{ player.pid}}: {{ player.name }}</button>
+                        <button class="white_button" onclick="location.href='/submit/{{ area }}/{{ player.class }}/{{ player.pid }}'">{{ player.pid}}: {{ player.name }}</button>
                     </tr>
                     {% else %}
                     <tr>
