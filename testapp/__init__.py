@@ -16,6 +16,12 @@ cursor = conn.cursor()
 
 
 sql = """
+DROP TABLE IF EXISTS player
+"""
+cursor.execute(sql)
+conn.commit()
+
+sql = """
 CREATE TABLE IF NOT EXISTS player (
     id INT AUTO_INCREMENT PRIMARY KEY, 
     pid INT, 

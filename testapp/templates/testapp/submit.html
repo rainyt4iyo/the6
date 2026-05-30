@@ -2,7 +2,11 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Submit</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/submit.css') }}"/>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <title>THE|6</title>
 </head>
 <body>
     <div>
@@ -12,50 +16,55 @@
     <hr>
 
     <h3>Result Submit</h3>
-    <p>Name: {{ player.name }} (ID: {{ player.pid }}, Class: {{ player.class }})</p>
+    <br>
+    <p class="player-info">{{ player.name }}　/　{{ player.class }}</p>
+    <p class="small">ID: {{ player.pid }}</p>
 
     <form method="POST">
-        
-        <div class="area-group">
-            <p>{{area}}1</p>
-            <div>
-                {% if result[0].get('zt') == 1 %}
-                    <label><input type="checkbox" name="zt_{{ nums[0] }}" class="check_z" value="Z" checked> Z</label>
-                {% else %}
-                    <label><input type="checkbox" name="zt_{{ nums[0] }}" class="check_z" value="Z"> Z</label>
-                {% endif %}
+
+        <!-- ★ 横並びラッパー ★ -->
+        <div class="areas-flex">
+
+            <div class="area-group">
+                <p>{{area}}1</p>
+                <div>
+                    {% if result[0].get('zt') == 1 %}
+                        <label><input type="checkbox" name="zt_{{ nums[0] }}" class="check_z" value="Z" checked> ZONE</label>
+                    {% else %}
+                        <label><input type="checkbox" name="zt_{{ nums[0] }}" class="check_z" value="Z"> ZONE</label>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if result[0].get('zt') == 2 %}
+                        <label><input type="checkbox" name="zt_{{ nums[0] }}" class="check_t" value="T" checked> TOP</label>
+                    {% else %}
+                        <label><input type="checkbox" name="zt_{{ nums[0] }}" class="check_t" value="T"> TOP</label>
+                    {% endif %}
+                </div>
             </div>
-            <div>
-                {% if result[0].get('zt') == 2 %}
-                    <label><input type="checkbox" name="zt_{{ nums[0] }}" class="check_t" value="T" checked> T</label>
-                {% else %}
-                    <label><input type="checkbox" name="zt_{{ nums[0] }}" class="check_t" value="T"> T</label>
-                {% endif %}
+
+            <div class="area-group">
+                <p>{{area}}2</p>
+                <div>
+                    {% if result[1].get('zt') == 1 %}
+                        <label><input type="checkbox" name="zt_{{ nums[1] }}" class="check_z" value="Z" checked> ZONE</label>
+                    {% else %}
+                        <label><input type="checkbox" name="zt_{{ nums[1] }}" class="check_z" value="Z"> ZONE</label>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if result[1].get('zt') == 2 %}
+                        <label><input type="checkbox" name="zt_{{ nums[1] }}" class="check_t" value="T" checked> TOP</label>
+                    {% else %}
+                        <label><input type="checkbox" name="zt_{{ nums[1] }}" class="check_t" value="T"> TOP</label>
+                    {% endif %}
+                </div>
             </div>
+
         </div>
+        <!-- /areas-flex -->
 
-        <br>
-
-        <div class="area-group">
-            <p>{{area}}2</p>
-            <div>
-                {% if result[1].get('zt') == 1 %}
-                    <label><input type="checkbox" name="zt_{{ nums[1] }}" class="check_z" value="Z" checked> Z</label>
-                {% else %}
-                    <label><input type="checkbox" name="zt_{{ nums[1] }}" class="check_z" value="Z"> Z</label>
-                {% endif %}
-            </div>
-            <div>
-                {% if result[1].get('zt') == 2 %}
-                    <label><input type="checkbox" name="zt_{{ nums[1] }}" class="check_t" value="T" checked> T</label>
-                {% else %}
-                    <label><input type="checkbox" name="zt_{{ nums[1] }}" class="check_t" value="T"> T</label>
-                {% endif %}
-            </div>
-        </div>
-
-        <br>
-        <button type="submit">まとめて送信</button>
+        <button type="submit">送信</button>
     </form>
 
     <script>
@@ -64,14 +73,27 @@
             const checkT = group.querySelector('.check_t');
 
             if (checkZ && checkT) {
+                // 初期状態の反映
+                if (checkT.checked) {
+                    checkZ.checked = true;
+                    checkZ.disabled = true;
+                }
+
                 checkZ.addEventListener('change', function() {
                     if (this.checked) {
                         checkT.checked = false;
+                        checkZ.disabled = false;
                     }
                 });
 
                 checkT.addEventListener('change', function() {
                     if (this.checked) {
+                        // T ON → Z も ON にして disabled
+                        checkZ.checked = true;
+                        checkZ.disabled = true;
+                    } else {
+                        // T OFF → Z の disabled を解除
+                        checkZ.disabled = false;
                         checkZ.checked = false;
                     }
                 });

@@ -1,0 +1,246 @@
+/* ============================================
+   result_check.css — Result Check · PC向け
+   White / Clean Sport · T=緑 Z=薄緑 強調
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+/* --- Variables --- */
+:root {
+  --bg:         #ffffff;
+  --surface:    #f4f5f7;
+  --surface-2:  #eaecf0;
+  --border:     #d8dce6;
+  --text:       #1a1d27;
+  --text-sub:   #6b7080;
+
+  /* T = 濃い緑 */
+  --t-bg:       #0f3d35;
+  --t-text:     #ffffff;
+  --t-accent:   #2ecc9a;
+
+  /* Z = 薄い緑 */
+  --z-bg:       #e6f9f4;
+  --z-text:     #0a5c47;
+  --z-border:   #2ecc9a;
+
+  --radius:     10px;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.09);
+}
+
+/* --- Reset --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* --- Body --- */
+body {
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Container --- */
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+}
+
+.container > br { display: none; }
+
+/* --- 見出し --- */
+h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+h3::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 1.8rem;
+  background: var(--text);
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   テーブル外枠
+   ============================================ */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background: var(--bg);
+}
+
+/* ============================================
+   ヘッダー行
+   ============================================ */
+table thead tr,
+table tr:first-child {
+  background: var(--text);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+table th {
+  padding: 10px 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+  text-align: center;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+table th:last-child { border-right: none; }
+
+/* ID・Name列は左揃え */
+table th:nth-child(1),
+table th:nth-child(2) {
+  text-align: left;
+  padding-left: 14px;
+  color: rgba(255,255,255,0.85);
+}
+
+/* ============================================
+   データ行
+   ============================================ */
+table tbody tr,
+table tr:not(:first-child) {
+  border-bottom: 1px solid var(--surface-2);
+  transition: background 0.12s;
+}
+
+table tbody tr:last-child,
+table tr:last-child {
+  border-bottom: none;
+}
+
+table tbody tr:hover,
+table tr:not(:first-child):hover {
+  background: var(--surface);
+}
+
+/* 偶数行に薄い縞 */
+table tbody tr:nth-child(even),
+table tr:not(:first-child):nth-child(even) {
+  background: rgba(244,245,247,0.6);
+}
+table tbody tr:nth-child(even):hover {
+  background: var(--surface);
+}
+
+table td {
+  padding: 9px 8px;
+  text-align: center;
+  color: var(--text-sub);
+  font-size: 0.82rem;
+  border-right: 1px solid var(--surface-2);
+  vertical-align: middle;
+}
+
+table td:last-child { border-right: none; }
+
+/* ID列 */
+table td:nth-child(1) {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-sub);
+  text-align: left;
+  padding-left: 14px;
+  width: 52px;
+}
+
+/* Name列 */
+table td:nth-child(2) {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text);
+  text-align: left;
+  padding-left: 14px;
+  white-space: nowrap;
+  min-width: 100px;
+}
+
+/* Kadai列（3列目以降）固定幅 */
+table td:nth-child(n+3) {
+  width: 58px;
+  min-width: 48px;
+}
+
+/* ============================================
+   T / Z 強調表示
+   HTMLで <td class="cell-t"> / <td class="cell-z"> を付与
+   ============================================ */
+
+/* T = 濃い緑 */
+td.cell-t {
+  background: var(--t-bg) !important;
+  color: var(--t-text) !important;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  border-right-color: rgba(46,204,154,0.25) !important;
+  box-shadow: inset 3px 0 0 var(--t-accent);
+}
+
+/* Z = 薄い緑 */
+td.cell-z {
+  background: var(--z-bg) !important;
+  color: var(--z-text) !important;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  border-right-color: rgba(46,204,154,0.2) !important;
+  box-shadow: inset 3px 0 0 var(--z-border);
+}
+
+/* 0（未入力）はさらに薄く */
+td.cell-empty {
+  color: var(--surface-2);
+  font-size: 0.7rem;
+}
+
+/* ============================================
+   スクロール対応（横スクロール）
+   ============================================ */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll table {
+  min-width: 1100px;
+  box-shadow: none;
+  border-radius: 0;
+}

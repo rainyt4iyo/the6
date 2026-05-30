@@ -7,8 +7,10 @@ import pymysql
 import time
 import logging
 from contextlib import contextmanager
+import re
 
 BASE_POINT = 50
+NUMBER_OF_KADAI = 18
 
 def db_connection():
     return pymysql.connect(host='localhost',
@@ -47,6 +49,21 @@ def area2number(area):
     else:
         return None
     
+def class2japanese(class_name):
+    if "F" in class_name:
+        prefix = "FUN"
+    elif "O" in class_name:
+        prefix = "OPEN"
+    if "M" in class_name:   
+        suffix = "男子"
+    elif "W" in class_name:
+        suffix = "女子"
+    else:
+        suffix = ""
+    grade = re.sub(r'\D', '', class_name)
+
+    return f"{prefix}{grade}年生{suffix}"
+
 @app.route('/')
 def mainpage():
     return render_template('testapp/mainpage.html')
@@ -69,15 +86,47 @@ def player_check():
     print(players)
     return render_template('testapp/player_check.html', players=players)
 
-@app.route('/result_check')
-def result_check(): 
+@app.route('/result_check/<class_name>')
+def result_check(class_name): 
     with db_connection() as conn:
         with conn.cursor() as cursor:
-            sql = "SELECT * FROM result"
-            cursor.execute(sql)
+            sql = "SELECT * FROM player WHERE class=%s"
+            cursor.execute(sql, (class_name,))
+            players = cursor.fetchall()
+    print(players)
+
+    with db_connection() as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT * FROM result WHERE class=%s"
+            cursor.execute(sql, (class_name,))
             results = cursor.fetchall()
+
+    res_list = []
+    for p in players:
+        p_list = []
+        for r in results:
+            if p['pid'] == r['pid'] and r['zt'] != 0:
+                p_list.append((r["kid"], r["zt"]))
+        res_list.append(p_list)
+
+    results = []
+    for i in res_list:
+        result = []
+        for j in range(0, NUMBER_OF_KADAI):
+            if not any(int(kid) == j+1 for kid, zt in i):
+                result.append((0))
+            else:
+                for index, (kid, zt) in enumerate(i):
+                    if int(kid) == j+1:
+                        if zt == 1:
+                            result.append(("Z"))
+                        elif zt == 2:
+                            result.append(("T"))
+        results.append(result)
+
     print(results)
-    return render_template('testapp/result_check.html', results=results)
+
+    return render_template('testapp/result_check.html', results=results, class_name=class_name, players=players)
 
 @app.route('/registration/<area>/<grade>')
 def registration_choice(grade, area):
@@ -107,14 +156,16 @@ def registration_choice(grade, area):
                 players = cursor.fetchall()
         player_list.append(players)
     
-    print(player_list)
+    #print(player_list)
 
-    if grade == 1 or grade == 2 or grade == 3:
-        return render_template('testapp/choice1.html', grade=grade, player_list=player_list, grade_list=grade_list, area=area)
-    if grade == 4:
-        return render_template('testapp/choice4.html', grade=grade, player_list=player_list, grade_list=grade_list, area=area)
-    if grade == 5 or grade == 6:
-        return render_template('testapp/choice5.html', grade=grade, player_list=player_list, grade_list=grade_list, area=area)
+    grade_list_japanese = []
+    for i in grade_list:
+        i = class2japanese(i)
+        grade_list_japanese.append(i)
+    
+    grade_list = grade_list_japanese
+    
+    return render_template('testapp/choice.html', grade=grade, player_list=player_list, grade_list=grade_list, area=area)
 
 @app.route('/submit/<area>/<class_name>/<pid>', methods=['GET','POST'])
 def submit(area, class_name, pid):
@@ -206,6 +257,7 @@ def realtimeresult(class_name):
             zt = player_result.get('zt')
             if kid is not None and zt == 2:
                 player_point += temp_point_list[int(kid) - 1]
+                player_point += 1
             elif kid is not None and zt == 1:
                 player_point += 1
 

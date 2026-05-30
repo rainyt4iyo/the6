@@ -1,0 +1,319 @@
+/* ============================================
+   submit.css — White / Clean Sport UI
+   iPad Portrait (768px) · Two area-groups side-by-side
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+/* --- Variables --- */
+:root {
+  --bg:          #ffffff;
+  --surface:     #f4f5f7;
+  --surface-2:   #eaecf0;
+  --border:      #d8dce6;
+  --text:        #1a1d27;
+  --text-sub:    #6b7080;
+
+  --z-bg:        #1a2a4a;
+  --z-hover:     #243760;
+  --z-text:      #ffffff;
+  --z-accent:    #4a9eff;
+
+  --t-bg:        #0f3d35;
+  --t-hover:     #185044;
+  --t-text:      #ffffff;
+  --t-accent:    #2ecc9a;
+
+  --radius:      10px;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-btn:  0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* --- Reset --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* --- Body --- */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 15px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- 外枠 --- */
+body > div:first-child {
+  padding: 16px 24px;
+  border-bottom: 1.5px solid var(--border);
+  background: var(--surface);
+}
+
+/* --- 戻るボタン --- */
+body > div:first-child button {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+body > div:first-child button:hover {
+  background: var(--surface-2);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+hr {
+  display: none;
+}
+
+/* --- コンテナ相当（form の親） --- */
+h3, p, form {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* --- 見出し --- */
+h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  text-transform: uppercase;
+  margin-top: 28px;
+  margin-bottom: 6px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+h3::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 2rem;
+  background: var(--text);
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* --- プレイヤー情報 --- */
+body > p {
+  padding: 0 24px;
+  margin-bottom: 24px;
+  font-size: 0.88rem;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+p.player-info {
+  font-size: 2.0rem;
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* --- 小さなテキスト --- */
+body > p.small {
+  font-size: 1.0rem;
+  color: var(--text-sub);
+  font-weight: 400;
+}
+
+/* --- フォーム --- */
+form {
+  padding: 0 24px 48px;
+}
+
+/* ============================================
+   2列横並び
+   ============================================ */
+form {
+  display: block;
+}
+
+form > .area-group-wrapper,
+form > br {
+  /* br は後述で非表示 */
+}
+
+/* area-group を包むラッパーをflexで横並びに */
+.areas-flex {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+/* br タグを消す */
+form > br {
+  display: none;
+}
+
+/* ============================================
+   area-group カード
+   ============================================ */
+.area-group {
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* エリア名ヘッダー */
+.area-group > p {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+  background: var(--surface);
+  padding: 10px 16px;
+  border-bottom: 1.5px solid var(--border);
+  margin: 0;
+}
+
+/* チェックボックス行 */
+.area-group > div {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--surface-2);
+}
+.area-group > div:last-child {
+  border-bottom: none;
+}
+
+/* label */
+.area-group label {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* チェックボックス本体を隠してカスタムボタン化 */
+.area-group input[type="checkbox"] {
+  display: none;
+}
+
+/* Z ボタン */
+.area-group label:has(.check_z) {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+  color: var(--text-sub);
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.area-group label:has(.check_z:checked) {
+  background: var(--z-bg);
+  color: var(--z-text);
+  border-color: var(--z-bg);
+  border-left: 5px solid var(--z-accent);
+  box-shadow: 0 4px 14px rgba(26,42,74,0.28);
+}
+.area-group label:has(.check_z):hover {
+  background: var(--surface-2);
+  border-color: var(--z-bg);
+}
+.area-group label:has(.check_z:checked):hover {
+  background: var(--z-hover);
+}
+
+/* Z disabled（T選択時） */
+.area-group label:has(.check_z:disabled) {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* T ボタン */
+.area-group label:has(.check_t) {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+  color: var(--text-sub);
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.area-group label:has(.check_t:checked) {
+  background: var(--t-bg);
+  color: var(--t-text);
+  border-color: var(--t-bg);
+  border-left: 5px solid var(--t-accent);
+  box-shadow: 0 4px 14px rgba(15,61,53,0.28);
+}
+.area-group label:has(.check_t):hover {
+  background: var(--surface-2);
+  border-color: var(--t-bg);
+}
+.area-group label:has(.check_t:checked):hover {
+  background: var(--t-hover);
+}
+
+/* ============================================
+   送信ボタン
+   ============================================ */
+form > button[type="submit"] {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--text);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  box-shadow: var(--shadow-btn);
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+form > button[type="submit"]:hover {
+  background: #2d3348;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+  transform: translateY(-1px);
+}
+form > button[type="submit"]:active {
+  transform: scale(0.98);
+}
+
+/* ============================================
+   iPad縦向き（768px）
+   ============================================ */
+@media (max-width: 820px) {
+  h3         { font-size: 1.65rem; padding: 0 16px; margin-top: 20px; }
+  body > p   { padding: 0 16px; }
+  form       { padding: 0 16px 40px; }
+  .areas-flex { gap: 12px; }
+}
+
+/* ============================================
+   スマホ縦 — 1列
+   ============================================ */
+@media (max-width: 520px) {
+  .areas-flex { flex-direction: column; }
+}
