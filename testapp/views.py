@@ -46,6 +46,10 @@ def area2number(area):
         return (15, 16)
     elif area == "I":
         return (17, 18)
+    
+    elif area == "fff":
+        return (1, 2, 3, 4)
+    
     else:
         return None
     
@@ -167,6 +171,84 @@ def registration_choice(grade, area):
     
     return render_template('testapp/choice.html', grade=grade, player_list=player_list, grade_list=grade_list, area=area)
 
+@app.route('/finalregistration/<area>/<grade>')
+def finalregistration_choice(grade, area):
+    grade = int(grade)
+    if grade == 1:
+        grade_list = ["F1", "O1"]
+    elif grade == 2:
+        grade_list = ["F2", "O2"]
+    elif grade == 3:
+        grade_list = ["F3", "O3"]
+    elif grade == 4:
+        grade_list = ["F4", "O4M", "O4W"]
+    elif grade == 5:
+        grade_list = ["F5M", "F5W", "O5M", "O5W"]
+    elif grade == 6:
+        grade_list = ["F6M", "F6W", "O6M", "O6W"]
+    else:
+        grade_list = []
+
+    player_list = []
+
+    for class_name in grade_list:
+        with db_connection() as conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT * FROM finalplayer WHERE class=%s"
+                cursor.execute(sql, (class_name,))
+                players = cursor.fetchall()
+        player_list.append(players)
+    
+    #print(player_list)
+
+    grade_list_japanese = []
+    for i in grade_list:
+        i = class2japanese(i)
+        grade_list_japanese.append(i)
+    
+    grade_list = grade_list_japanese
+    
+    return render_template('testapp/finalchoice.html', grade=grade, player_list=player_list, grade_list=grade_list, area=area)
+
+@app.route('/finalregistration/<area>/<grade>')
+def finalregistration(grade, area):
+    grade = int(grade)
+    if grade == 1:
+        grade_list = ["F1", "O1"]
+    elif grade == 2:
+        grade_list = ["F2", "O2"]
+    elif grade == 3:
+        grade_list = ["F3", "O3"]
+    elif grade == 4:
+        grade_list = ["F4", "O4M", "O4W"]
+    elif grade == 5:
+        grade_list = ["F5M", "F5W", "O5M", "O5W"]
+    elif grade == 6:
+        grade_list = ["F6M", "F6W", "O6M", "O6W"]
+    else:
+        grade_list = []
+
+    player_list = []
+
+    for class_name in grade_list:
+        with db_connection() as conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT * FROM finalplayer WHERE class=%s"
+                cursor.execute(sql, (class_name,))
+                players = cursor.fetchall()
+        player_list.append(players)
+    
+    #print(player_list)
+
+    grade_list_japanese = []
+    for i in grade_list:
+        i = class2japanese(i)
+        grade_list_japanese.append(i)
+    
+    grade_list = grade_list_japanese
+    
+    return render_template('testapp/choice.html', grade=grade, player_list=player_list, grade_list=grade_list, area=area)
+
 @app.route('/submit/<area>/<class_name>/<pid>', methods=['GET','POST'])
 def submit(area, class_name, pid):
     nums = area2number(area)
@@ -223,6 +305,105 @@ def submit(area, class_name, pid):
 
         return redirect(url_for('registration_choice', grade=grade, area=area))
     
+
+
+@app.route('/final_player/<class_name>', methods=['GET','POST'])
+def final_player(class_name):
+    if request.method == 'POST':
+        # formから 'action' を取得し、登録か削除かを判定
+        action = request.form.get('action')
+
+        with db_connection() as conn:
+            with conn.cursor() as cursor:
+                if action == 'add':
+                    pid = request.form.get('pid')
+                    name = request.form.get('name')
+                    
+                    if pid and name:
+                        sql_insert = "INSERT INTO finalplayer (pid, class, name) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE name=%s"
+                        cursor.execute(sql_insert, (pid, class_name, name, name))
+                elif action == 'delete':
+                    pid = request.form.get('pid')
+                    
+                    if pid:
+                        # 該当する pid と class のレコードを削除
+                        sql_delete = "DELETE FROM finalplayer WHERE pid=%s AND class=%s"
+                        cursor.execute(sql_delete, (pid, class_name))
+                        
+            conn.commit()
+            
+        # 処理完了後、画面を再読み込み（二重送信防止）
+        return redirect(url_for('final_player', class_name=class_name))
+    
+    with db_connection() as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT * FROM finalplayer WHERE class=%s ORDER BY pid ASC"
+            cursor.execute(sql, (class_name,))
+            players = cursor.fetchall()
+
+    return render_template('testapp/final_player.html', players=players, class_name=class_name)
+
+
+@app.route('/finalsubmit/<area>/<class_name>/<pid>', methods=['GET','POST'])
+def finalsubmit(area, class_name, pid):
+    nums = area2number(area)
+    if nums is None:
+        return "Invalid area", 400 
+
+    if request.method == 'GET':
+        player = player_information(pid, class_name)
+        if player is None:
+            return "Player not found", 404
+
+        with db_connection() as conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT * FROM finalresult WHERE pid=%s AND class=%s"
+                cursor.execute(sql, (pid, class_name))
+                res = cursor.fetchall()
+                print(res)
+    
+        res_0 = next((row for row in res if str(row.get('kid')) == str(nums[0])), {'pid': pid, 'class': class_name, 'kid': nums[0], 'zt': 0})
+        res_1 = next((row for row in res if str(row.get('kid')) == str(nums[1])), {'pid': pid, 'class': class_name, 'kid': nums[1], 'zt': 0})
+        res_2 = next((row for row in res if str(row.get('kid')) == str(nums[2])), {'pid': pid, 'class': class_name, 'kid': nums[2], 'zt': 0})
+        res_3 = next((row for row in res if str(row.get('kid')) == str(nums[3])), {'pid': pid, 'class': class_name, 'kid': nums[3], 'zt': 0})
+        
+        result = [res_0, res_1, res_2, res_3]
+
+        print(result)
+        return render_template('testapp/finalsubmit.html', player=player, result=result, nums=nums, area=area)
+
+    if request.method == 'POST':
+        with db_connection() as conn:
+            with conn.cursor() as cursor:
+                # 2つのエリア分、ループ処理で順番に保存する
+                for num in nums:
+                    # HTMLの name="zt_1" や name="zt_2" から値を取得
+                    zt_value = request.form.get(f'zt_{num}', '')
+
+                    if zt_value == "":
+                        zt = 0
+                    elif zt_value == "Z":
+                        zt = 1
+                    elif zt_value == "T":            
+                        zt = 2
+                    
+                    # 各エリア（num）ごとにINSERT or UPDATEを実行
+                    sql = "INSERT INTO finalresult (pid, class, kid, zt) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE zt=%s"
+                    cursor.execute(sql, (pid, class_name, num, zt, zt))
+            conn.commit()
+        
+        # グレード判定ロジック
+        if class_name in ["F1", "O1"]: grade = 1
+        elif class_name in ["F2", "O2"]: grade = 2
+        elif class_name in ["F3", "O3"]: grade = 3
+        elif class_name in ["F4", "O4M", "O4W"]: grade = 4
+        elif class_name in ["F5M", "F5W", "O5M", "O5W"]: grade = 5
+        elif class_name in ["F6M", "F6W", "O6M", "O6W"]: grade = 6
+        else: return "Invalid class", 400
+
+        return redirect(url_for('finalregistration_choice', grade=grade, area=area))
+    
+    
 @app.route('/realtimeresult/<class_name>')
 def realtimeresult(class_name):
     with db_connection() as conn:
@@ -260,6 +441,60 @@ def realtimeresult(class_name):
                 player_point += 1
             elif kid is not None and zt == 1:
                 player_point += 1
+
+        for p in players:
+            if p.get('pid') == pid:
+                p['point'] = player_point  # 新しいキー 'point' として値を代入
+                break  # 見つかったらこれ以上この内側ループを回す必要はないので抜ける  
+
+    players.sort(key=lambda x: x.get('point', 0), reverse=True)
+    for i, player in enumerate(players):
+        current_point = player.get('point', 0)
+        
+        if i > 0 and current_point == players[i-1].get('point', 0):
+            # 直前のプレイヤーと同点なら、同じ順位にする
+            player['rank'] = players[i-1]['rank']
+        else:
+            # 同点でないなら、現在の「順番（インデックス + 1）」を順位にする
+            player['rank'] = i + 1
+    
+    print(players)
+    print(temp_point_list)
+
+    return render_template('testapp/realtimeresult.html', results=results, players=players, temp_point_list=temp_point_list, class_name=class_name)
+
+
+@app.route('/finalrealtimeresult/<class_name>')
+def finalrealtimeresult(class_name):
+    with db_connection() as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT * FROM finalresult WHERE class=%s"
+            cursor.execute(sql, (class_name,))
+            results = cursor.fetchall()
+    print(results)
+
+    with db_connection() as conn:
+        with conn.cursor() as cursor:
+            sql = "SELECT * FROM finalplayer WHERE class=%s"
+            cursor.execute(sql, (class_name,))
+            players= cursor.fetchall()
+    print(players)
+
+    temp_point_list = []
+    pid_list = list(set(row['pid'] for row in results if 'pid' in row))
+    print(pid_list)
+
+    for pid in pid_list:
+        player_results = [row for row in results if row.get('pid') == pid]
+        print(player_results)
+        player_point = 0
+        for player_result in player_results:
+            kid = player_result.get('kid')
+            zt = player_result.get('zt')
+            if kid is not None and zt == 2:
+                player_point += 25 
+            elif kid is not None and zt == 1:
+                player_point += 10
 
         for p in players:
             if p.get('pid') == pid:

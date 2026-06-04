@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}"/>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <title>THE|6</title>
+</head>
+<body>
+    <div class="container">
+    <img class="header" src="/static/images/banner_1280p.png">
+    <br>
+    
+    <h3>決勝選手登録 ({{ class_name }})</h3>
+    
+    <form method="POST" style="margin-bottom: 20px;">
+        <input type="hidden" name="action" value="add">
+        
+        <label>No: <input type="number" name="pid" required style="width: 60px;"></label>
+        <label>Name: <input type="text" name="name" required></label>
+        
+        <button class="white_button" type="submit">登録</button>
+    </form>
+
+    <table>
+        <tr>
+            <th>No</th>
+            <th>Name</th>
+            <th></th> </tr>
+        {% for player in players %}
+        <tr>
+            <td>{{ player.pid }}</td>
+            <td>{{ player.name }}</td>
+            <td style="text-align: center;">
+                
+                <form method="POST" style="margin: 0;">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="pid" value="{{ player.pid }}">
+                    
+                    <button type="submit" style="color: red; background: transparent; border: none; font-size: 1.2em; cursor: pointer;">✖</button>
+                </form>
+                
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+</body>
+</html>

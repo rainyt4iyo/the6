@@ -34,6 +34,18 @@ cursor.execute(sql)
 conn.commit()
 
 sql = """
+CREATE TABLE IF NOT EXISTS finalplayer (
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+    pid INT, 
+    class VARCHAR(255), 
+    name VARCHAR(255),
+    UNIQUE(pid, class)
+)
+"""
+cursor.execute(sql)
+conn.commit()
+
+sql = """
 CREATE TABLE IF NOT EXISTS result (
     key_id INT AUTO_INCREMENT PRIMARY KEY, 
     pid INT, 
@@ -46,6 +58,19 @@ CREATE TABLE IF NOT EXISTS result (
 cursor.execute(sql)
 conn.commit()
 
+sql = """
+CREATE TABLE IF NOT EXISTS finalresult (
+    key_id INT AUTO_INCREMENT PRIMARY KEY, 
+    pid INT, 
+    class VARCHAR(255), 
+    kid VARCHAR(255), 
+    zt INT, 
+    trynum INT,
+    UNIQUE(pid, class, kid)
+)
+"""
+cursor.execute(sql)
+conn.commit()
 
 print("--------------------------------------")
 print("[DB] > 初期化完了")
