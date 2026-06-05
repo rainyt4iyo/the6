@@ -7,6 +7,125 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}"/>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <title>THE|6</title>
+    <style>
+        #status {
+            font-size: 0.8em;
+            color: gray;
+            margin: 0 16px 8px;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .popup-overlay:target {
+            display: flex;
+        }
+        .popup {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            width: 90%;
+            max-width: 360px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        }
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .popup-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            color: #1a1d27;
+        }
+        .popup-close {
+            font-size: 1.3rem;
+            color: #6b7080;
+            text-decoration: none;
+            line-height: 1;
+        }
+        .popup-close:hover {
+            color: #1a1d27;
+        }
+        .popup-legend {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            font-size: 0.78rem;
+            color: #6b7080;
+        }
+        .legend-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        .legend-dot-top  { background: #4a9eff !important; }
+        .legend-dot-zone { background: #2ecc9a !important; }
+        .legend-dot-none { background: #eaecf0 !important; border: 1px solid #d8dce6 !important; }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+        }
+
+        /* result.cssとの競合を避けるため詳細度を上げて!importantも使用 */
+        .popup .problem-grid .pcell {
+            aspect-ratio: 1 !important;
+            border-radius: 6px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-family: 'Barlow Condensed', sans-serif !important;
+            font-weight: 700 !important;
+            font-size: 0.85rem !important;
+            background: #eaecf0 !important;
+            color: #6b7080 !important;
+            border: 1px solid #d8dce6 !important;
+            box-sizing: border-box !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+        }
+        .popup .problem-grid .pcell.is-top {
+            background: #4a9eff !important;
+            color: #ffffff !important;
+            border-color: #4a9eff !important;
+        }
+        .popup .problem-grid .pcell.is-zone {
+            background: #2ecc9a !important;
+            color: #ffffff !important;
+            border-color: #2ecc9a !important;
+        }
+
+        .btn-detail {
+            display: inline-block;
+            background: none;
+            border: 1px solid #d8dce6;
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            color: #6b7080;
+            font-family: 'Noto Sans JP', sans-serif;
+            text-decoration: none;
+        }
+        .btn-detail:hover {
+            background: #f4f5f7;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -14,6 +133,7 @@
         <br>
         <h3>リアルタイムリザルト <br> Live Results</h3>
         <p id="status">接続中...</p>
+
         <table id="result-table">
             <thead>
                 <tr>
@@ -24,65 +144,69 @@
                 </tr>
             </thead>
             <tbody id="result-body">
-                {# 初期表示はJinja2で描画 #}
                 {% for player in players %}
                 <tr>
                     <td>{{ player.rank }}</td>
                     <td>{{ player.name }}</td>
-                    <td>{{ player.point }}</td>
-                    <td>{{ player.details }}</td>
+                    <td>{{ player.point if player.point is defined else 0 }}</td>
+                    <td>
+                        <a class="btn-detail" href="#popup-{{ player.pid }}">詳細</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
+    <!-- 各プレイヤーのポップアップ -->
+    {% for player in players %}
+    <div class="popup-overlay" id="popup-{{ player.pid }}">
+        <div class="popup">
+            <div class="popup-header">
+                <span class="popup-title">{{ player.name }}</span>
+                <a class="popup-close" href="#">✕</a>
+            </div>
+            <div class="popup-legend">
+                <span><span class="legend-dot legend-dot-top"></span>TOP</span>
+                <span><span class="legend-dot legend-dot-zone"></span>ZONE</span>
+                <span><span class="legend-dot legend-dot-none"></span>未登録</span>
+            </div>
+            <div class="problem-grid">
+                {% for n in range(1, 19) %}
+                    {% set n_str = n %}
+                    {% if player.detail is defined and n_str in player.detail.top %}
+                        <div class="pcell is-top">{{ tag[n-1] }}</div>
+                    {% elif player.detail is defined and n_str in player.detail.zone %}
+                        <div class="pcell is-zone">{{ tag[n-1] }}</div>
+                    {% else %}
+                        <div class="pcell">{{ tag[n-1] }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
     <script>
-        const className  = "{{ class_name }}";
-        const statusEl   = document.getElementById('status');
-        const tbodyEl    = document.getElementById('result-body');
+        const className = "{{ class_name }}";
+        const statusEl  = document.getElementById('status');
 
         function connectSSE() {
             const es = new EventSource(`/realtimeresult/${className}/stream`);
-
             es.onopen = () => {
                 statusEl.textContent = '🟢 ライブ更新中';
             };
-
             es.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                if (data.error) {
-                    console.error('Server error:', data.error);
-                    return;
-                }
-                renderTable(data.players);
-                // 最終更新時刻を表示
+                if (data.error) { console.error('Server error:', data.error); return; }
                 const now = new Date().toLocaleTimeString('ja-JP');
                 statusEl.textContent = `🟢 ライブ更新中　最終更新: ${now}`;
             };
-
             es.onerror = () => {
                 statusEl.textContent = '🔴 接続エラー。再接続中...';
                 es.close();
-                setTimeout(connectSSE, 5000); // 5秒後に再接続
+                setTimeout(connectSSE, 5000);
             };
-        }
-
-        function renderTable(players) {
-            const newRows = players.map(player => {
-                return `<tr>
-                    <td>${player.rank ?? ''}</td>
-                    <td>${player.name ?? ''}</td>
-                    <td>${player.point ?? 0}</td>
-                    <td>${player.details ?? ''}</td>
-                </tr>`;
-            }).join('');
-
-            // 内容が変わった時だけDOM更新
-            if (tbodyEl.innerHTML !== newRows) {
-                tbodyEl.innerHTML = newRows;
-                // 更新アニメーションを全行に適用
-            }
         }
 
         connectSSE();

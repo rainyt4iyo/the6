@@ -38,6 +38,20 @@ def player_information_final(pid, class_name):
             player = cursor.fetchone()
     return player
 
+def number2area(num):
+    area_map = {
+        1: "A1",  2: "A2",
+        3: "B1",  4: "B2",
+        5: "C1",  6: "C2",
+        7: "D1",  8: "D2",
+        9: "E1", 10: "E2",
+       11: "F1", 12: "F2",
+       13: "G1", 14: "G2",
+       15: "H1", 16: "H2",
+       17: "I1", 18: "I2",
+    }
+    return area_map.get(num, None)
+
 def area2number(area):
     if area == "A":
         return (1, 2)
@@ -267,21 +281,35 @@ def realtimeresult(class_name):
 
     for pid in pid_list:
         player_results = [row for row in results if row.get('pid') == pid]
-        print(player_results)
         player_point = 0
+        top_list = []    # ← ループの外に移動
+        zone_list = []   # ← ループの外に移動
+
         for player_result in player_results:
             kid = player_result.get('kid')
             zt = player_result.get('zt')
             if kid is not None and zt == 2:
                 player_point += temp_point_list[int(kid) - 1]
                 player_point += 1
+                top_list.append(int(kid))
             elif kid is not None and zt == 1:
                 player_point += 1
+                zone_list.append(int(kid))
+
+        player_detail = {'top': top_list, 'zone': zone_list}  # ← 変わらずループ外でOK
 
         for p in players:
             if p.get('pid') == pid:
-                p['point'] = player_point  # 新しいキー 'point' として値を代入
-                break  # 見つかったらこれ以上この内側ループを回す必要はないので抜ける  
+                p['point'] = round(player_point, 2)
+                p['detail'] = player_detail
+                break
+        
+        for p in players:
+            if 'detail' not in p:
+                p['detail'] = {'top': [], 'zone': []}
+            if 'point' not in p:
+                p['point'] = 0
+
 
     players.sort(key=lambda x: x.get('point', 0), reverse=True)
     for i, player in enumerate(players):
@@ -297,7 +325,9 @@ def realtimeresult(class_name):
     print(players)
     print(temp_point_list)
 
-    return render_template('testapp/realtimeresult.html', results=results, players=players, temp_point_list=temp_point_list, class_name=class_name)
+    tag = ["A1", "A2", "B1", "B2", "C1", "C2", "D1", "D2", "E1", "E2", "F1", "F2", "G1", "G2", "H1", "H2", "I1", "I2"]
+
+    return render_template('testapp/realtimeresult.html', results=results, players=players, temp_point_list=temp_point_list, class_name=class_name, tag=tag)
 
 
 # ★ SSE用の新しいエンドポイントを追加
