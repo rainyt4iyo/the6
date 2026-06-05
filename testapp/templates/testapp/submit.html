@@ -26,7 +26,7 @@
         <div class="areas-flex">
 
             <div class="area-group">
-                <p>{{area}}1</p>
+                <p>{{nums[0]}}</p>
                 <div>
                     {% if result[0].get('zt') == 1 %}
                         <label><input type="checkbox" name="zt_{{ nums[0] }}" class="check_z" value="Z" checked> ZONE</label>
@@ -44,7 +44,7 @@
             </div>
 
             <div class="area-group">
-                <p>{{area}}2</p>
+                <p>{{nums[1]}}</p>
                 <div>
                     {% if result[1].get('zt') == 1 %}
                         <label><input type="checkbox" name="zt_{{ nums[1] }}" class="check_z" value="Z" checked> ZONE</label>

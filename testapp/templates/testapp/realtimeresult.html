@@ -105,9 +105,9 @@
             border-color: #4a9eff !important;
         }
         .popup .problem-grid .pcell.is-zone {
-            background: #2ecc9a !important;
+            background: #9ae7ff !important;
             color: #ffffff !important;
-            border-color: #2ecc9a !important;
+            border-color: #9ae2ff !important;
         }
 
         .btn-detail {
@@ -175,11 +175,11 @@
                 {% for n in range(1, 19) %}
                     {% set n_str = n %}
                     {% if player.detail is defined and n_str in player.detail.top %}
-                        <div class="pcell is-top">{{ tag[n-1] }}</div>
+                        <div class="pcell is-top">{{ n_str }}</div>
                     {% elif player.detail is defined and n_str in player.detail.zone %}
-                        <div class="pcell is-zone">{{ tag[n-1] }}</div>
+                        <div class="pcell is-zone">{{ n_str }}</div>
                     {% else %}
-                        <div class="pcell">{{ tag[n-1] }}</div>
+                        <div class="pcell">{{ n_str }}</div>
                     {% endif %}
                 {% endfor %}
             </div>
