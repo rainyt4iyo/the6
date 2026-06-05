@@ -81,7 +81,6 @@
             gap: 6px;
         }
 
-        /* result.cssとの競合を避けるため詳細度を上げて!importantも使用 */
         .popup .problem-grid .pcell {
             aspect-ratio: 1 !important;
             border-radius: 6px !important;
@@ -144,70 +143,91 @@
                 </tr>
             </thead>
             <tbody id="result-body">
-                {% for player in players %}
-                <tr>
-                    <td>{{ player.rank }}</td>
-                    <td>{{ player.name }}</td>
-                    <td>{{ player.point if player.point is defined else 0 }}</td>
-                    <td>
-                        <a class="btn-detail" href="#popup-{{ player.pid }}">詳細</a>
-                    </td>
-                </tr>
-                {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <!-- 各プレイヤーのポップアップ -->
-    {% for player in players %}
-    <div class="popup-overlay" id="popup-{{ player.pid }}">
-        <div class="popup">
-            <div class="popup-header">
-                <span class="popup-title">{{ player.name }}</span>
-                <a class="popup-close" href="#">✕</a>
-            </div>
-            <div class="popup-legend">
-                <span><span class="legend-dot legend-dot-top"></span>TOP</span>
-                <span><span class="legend-dot legend-dot-zone"></span>ZONE</span>
-                <span><span class="legend-dot legend-dot-none"></span>未登録</span>
-            </div>
-            <div class="problem-grid">
-                {% for n in range(1, 19) %}
-                    {% set n_str = n %}
-                    {% if player.detail is defined and n_str in player.detail.top %}
-                        <div class="pcell is-top">{{ n_str }}</div>
-                    {% elif player.detail is defined and n_str in player.detail.zone %}
-                        <div class="pcell is-zone">{{ n_str }}</div>
-                    {% else %}
-                        <div class="pcell">{{ n_str }}</div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    {% endfor %}
+    <!-- ポップアップはJS側で動的に生成 -->
+    <div id="popup-container"></div>
 
     <script>
         const className = "{{ class_name }}";
         const statusEl  = document.getElementById('status');
+        const tbody     = document.getElementById('result-body');
+        const popupContainer = document.getElementById('popup-container');
+
+        const tag = ["A1","A2","B1","B2","C1","C2","D1","D2","E1","E2",
+                     "F1","F2","G1","G2","H1","H2","I1","I2"];
+
+        function renderPlayers(players) {
+            // テーブル更新
+            tbody.innerHTML = players.map(player => `
+                <tr>
+                    <td>${player.rank}</td>
+                    <td>${player.name}</td>
+                    <td>${player.point ?? 0}</td>
+                    <td><a class="btn-detail" href="#popup-${player.pid}">詳細</a></td>
+                </tr>
+            `).join('');
+
+            // ポップアップ更新
+            popupContainer.innerHTML = players.map(player => {
+                const topList  = (player.detail && player.detail.top)  || [];
+                const zoneList = (player.detail && player.detail.zone) || [];
+
+                const cells = tag.map((label, i) => {
+                    const n = i + 1;
+                    let cls = 'pcell';
+                    if (topList.map(Number).includes(n))       cls += ' is-top';
+                    else if (zoneList.map(Number).includes(n)) cls += ' is-zone';
+                    return `<div class="${cls}">${label}</div>`;
+                }).join('');
+
+                return `
+                    <div class="popup-overlay" id="popup-${player.pid}">
+                        <div class="popup">
+                            <div class="popup-header">
+                                <span class="popup-title">${player.name}</span>
+                                <a class="popup-close" href="#">✕</a>
+                            </div>
+                            <div class="popup-legend">
+                                <span><span class="legend-dot legend-dot-top"></span>TOP</span>
+                                <span><span class="legend-dot legend-dot-zone"></span>ZONE</span>
+                                <span><span class="legend-dot legend-dot-none"></span>未登録</span>
+                            </div>
+                            <div class="problem-grid">${cells}</div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
 
         function connectSSE() {
             const es = new EventSource(`/realtimeresult/${className}/stream`);
+
             es.onopen = () => {
                 statusEl.textContent = '🟢 ライブ更新中';
             };
+
             es.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 if (data.error) { console.error('Server error:', data.error); return; }
+
+                renderPlayers(data.players);
+
                 const now = new Date().toLocaleTimeString('ja-JP');
                 statusEl.textContent = `🟢 ライブ更新中　最終更新: ${now}`;
             };
+
             es.onerror = () => {
                 statusEl.textContent = '🔴 接続エラー。再接続中...';
                 es.close();
                 setTimeout(connectSSE, 5000);
             };
         }
+
+        // 初期表示（SSE接続前にJinja2側のデータで即時描画）
+        const initialPlayers = {{ players | tojson }};
+        renderPlayers(initialPlayers);
 
         connectSSE();
     </script>
