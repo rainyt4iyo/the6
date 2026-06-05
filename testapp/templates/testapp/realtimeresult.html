@@ -7,28 +7,105 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}"/>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <title>THE|6</title>
+    <style>
+        /* 更新時のフラッシュアニメーション */
+        @keyframes highlight {
+            0%   { background-color: #ffffcc; }
+            100% { background-color: transparent; }
+        }
+        .updated {
+            animation: highlight 1s ease-out;
+        }
+        #status {
+            font-size: 0.8em;
+            color: gray;
+            margin-bottom: 8px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-    <img class="header" src="/static/images/banner_1280p.png">
-    <br>
-    <h3>リアルタイムリザルト <br> Live Results</h3>
-    <table>
-        <tr>
-        <th>RANK</th>
-        <th>Name</th>
-        <th>Point</th>
-        <th>Details</th>
-        </tr>
-        {% for player in players %}
-        <tr>
-        <td>{{ player.rank }}</td>
-        <td>{{ player.name }}</td>
-        <td>{{ player.point }}</td>
-        <td>{{ player.details }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+        <img class="header" src="/static/images/banner_1280p.png">
+        <br>
+        <h3>リアルタイムリザルト <br> Live Results</h3>
+        <p id="status">接続中...</p>
+        <table id="result-table">
+            <thead>
+                <tr>
+                    <th>RANK</th>
+                    <th>Name</th>
+                    <th>Point</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody id="result-body">
+                {# 初期表示はJinja2で描画 #}
+                {% for player in players %}
+                <tr>
+                    <td>{{ player.rank }}</td>
+                    <td>{{ player.name }}</td>
+                    <td>{{ player.point }}</td>
+                    <td>{{ player.details }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+
+    <script>
+        const className  = "{{ class_name }}";
+        const statusEl   = document.getElementById('status');
+        const tbodyEl    = document.getElementById('result-body');
+
+        function connectSSE() {
+            const es = new EventSource(`/realtimeresult/${className}/stream`);
+
+            es.onopen = () => {
+                statusEl.textContent = '🟢 ライブ更新中';
+            };
+
+            es.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.error) {
+                    console.error('Server error:', data.error);
+                    return;
+                }
+                renderTable(data.players);
+                // 最終更新時刻を表示
+                const now = new Date().toLocaleTimeString('ja-JP');
+                statusEl.textContent = `🟢 ライブ更新中　最終更新: ${now}`;
+            };
+
+            es.onerror = () => {
+                statusEl.textContent = '🔴 接続エラー。再接続中...';
+                es.close();
+                setTimeout(connectSSE, 5000); // 5秒後に再接続
+            };
+        }
+
+        function renderTable(players) {
+            const newRows = players.map(player => {
+                return `<tr>
+                    <td>${player.rank ?? ''}</td>
+                    <td>${player.name ?? ''}</td>
+                    <td>${player.point ?? 0}</td>
+                    <td>${player.details ?? ''}</td>
+                </tr>`;
+            }).join('');
+
+            // 内容が変わった時だけDOM更新
+            if (tbodyEl.innerHTML !== newRows) {
+                tbodyEl.innerHTML = newRows;
+                // 更新アニメーションを全行に適用
+                tbodyEl.querySelectorAll('tr').forEach(tr => {
+                    tr.classList.remove('updated');
+                    void tr.offsetWidth; // reflow trick
+                    tr.classList.add('updated');
+                });
+            }
+        }
+
+        connectSSE();
+    </script>
 </body>
 </html>

@@ -8,6 +8,9 @@ import time
 import logging
 from contextlib import contextmanager
 import re
+import json
+import time
+from flask import Response, stream_with_context
 
 BASE_POINT = 50
 NUMBER_OF_KADAI = 18
@@ -296,3 +299,81 @@ def realtimeresult(class_name):
 
     return render_template('testapp/realtimeresult.html', results=results, players=players, temp_point_list=temp_point_list, class_name=class_name)
 
+
+# ★ SSE用の新しいエンドポイントを追加
+@app.route('/realtimeresult/<class_name>/stream')
+def realtimeresult_stream(class_name):
+    def get_data():
+        """DBからデータを取得してプレイヤーリストを返す"""
+        with db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM result WHERE class=%s", (class_name,))
+                results = cursor.fetchall()
+
+        with db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM player WHERE class=%s", (class_name,))
+                players = cursor.fetchall()
+
+        temp_point_list = []
+        for n in range(1, 19):
+            count = sum(1 for row in results if str(row.get('kid')) == str(n) and row.get('zt') == 2)
+            point = round(BASE_POINT / count, 2) if count > 0 else BASE_POINT
+            temp_point_list.append(point)
+
+        pid_list = list(set(row['pid'] for row in results if 'pid' in row))
+
+        for pid in pid_list:
+            player_results = [row for row in results if row.get('pid') == pid]
+            player_point = 0
+            for player_result in player_results:
+                kid = player_result.get('kid')
+                zt = player_result.get('zt')
+                if kid is not None and zt == 2:
+                    player_point += temp_point_list[int(kid) - 1]
+                    player_point += 1
+                elif kid is not None and zt == 1:
+                    player_point += 1
+
+            for p in players:
+                if p.get('pid') == pid:
+                    p['point'] = player_point
+                    break
+
+        players.sort(key=lambda x: x.get('point', 0), reverse=True)
+        for i, player in enumerate(players):
+            current_point = player.get('point', 0)
+            if i > 0 and current_point == players[i-1].get('point', 0):
+                player['rank'] = players[i-1]['rank']
+            else:
+                player['rank'] = i + 1
+
+        return players, temp_point_list
+
+    def event_stream():
+        last_data = None
+        while True:
+            try:
+                players, temp_point_list = get_data()
+                # シリアライズして前回と比較（変化があった時だけ送信）
+                current_data = json.dumps(players, ensure_ascii=False, default=str)
+                if current_data != last_data:
+                    last_data = current_data
+                    payload = json.dumps({
+                        'players': players,
+                        'temp_point_list': temp_point_list
+                    }, ensure_ascii=False, default=str)
+                    yield f"data: {payload}\n\n"
+            except Exception as e:
+                print(f"SSE error: {e}")
+                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            time.sleep(3)  # ★ 3秒ごとにDBを確認
+
+    return Response(
+        stream_with_context(event_stream()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no'  # Nginxを使う場合に必要
+        }
+    )
