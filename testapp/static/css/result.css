@@ -141,20 +141,13 @@ table th { text-align: center; }
 
 /* --- データ行 --- */
 table tbody tr,
-table tr:not(:first-child) {
-  border-bottom: 1px solid var(--surface-2);
-  transition: background 0.12s;
-}
+
 
 table tbody tr:last-child,
-table tr:last-child {
-  border-bottom: none;
-}
+
 
 table tbody tr:hover,
-table tr:not(:first-child):hover {
-  background: var(--surface);
-}
+
 
 table td {
   padding: 10px 10px;
