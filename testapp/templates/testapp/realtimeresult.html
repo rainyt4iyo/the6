@@ -97,11 +97,6 @@
             if (tbodyEl.innerHTML !== newRows) {
                 tbodyEl.innerHTML = newRows;
                 // 更新アニメーションを全行に適用
-                tbodyEl.querySelectorAll('tr').forEach(tr => {
-                    tr.classList.remove('updated');
-                    void tr.offsetWidth; // reflow trick
-                    tr.classList.add('updated');
-                });
             }
         }
 
