@@ -356,19 +356,34 @@ def realtimeresult_stream(class_name):
         for pid in pid_list:
             player_results = [row for row in results if row.get('pid') == pid]
             player_point = 0
+            top_list = []   # ★ ループ外に移動
+            zone_list = []  # ★ ループ外に移動
+
             for player_result in player_results:
                 kid = player_result.get('kid')
                 zt = player_result.get('zt')
                 if kid is not None and zt == 2:
                     player_point += temp_point_list[int(kid) - 1]
                     player_point += 1
+                    top_list.append(int(kid))   # ★ 追加
                 elif kid is not None and zt == 1:
                     player_point += 1
+                    zone_list.append(int(kid))  # ★ 追加
+
+            player_detail = {'top': top_list, 'zone': zone_list}  # ★ 追加
 
             for p in players:
                 if p.get('pid') == pid:
-                    p['point'] = player_point
+                    p['point'] = round(player_point, 2)  # ★ round追加
+                    p['detail'] = player_detail           # ★ 追加
                     break
+
+        # ★ ポイント未計算プレイヤーへのデフォルト値設定
+        for p in players:
+            if 'detail' not in p:
+                p['detail'] = {'top': [], 'zone': []}
+            if 'point' not in p:
+                p['point'] = 0
 
         players.sort(key=lambda x: x.get('point', 0), reverse=True)
         for i, player in enumerate(players):
@@ -379,6 +394,7 @@ def realtimeresult_stream(class_name):
                 player['rank'] = i + 1
 
         return players, temp_point_list
+
 
     def event_stream():
         last_data = None
