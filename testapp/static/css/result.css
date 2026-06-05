@@ -1,6 +1,5 @@
 /* ============================================
    result.css — Live Results · Mobile First
-   同系デザイン / スマートフォン最適化
    ============================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap');
@@ -14,9 +13,9 @@
   --text:       #1a1d27;
   --text-sub:   #6b7080;
 
-  --rank-1:     #b8860b;   /* ゴールド */
-  --rank-2:     #7a8a9a;   /* シルバー */
-  --rank-3:     #8b5a2b;   /* ブロンズ */
+  --rank-1:     #b8860b;
+  --rank-2:     #7a8a9a;
+  --rank-3:     #8b5a2b;
 
   --accent-z:   #4a9eff;
   --accent-t:   #2ecc9a;
@@ -83,15 +82,19 @@ h3::before {
   align-self: stretch;
 }
 
-/* brで改行された2行目は少し小さく */
-h3 br + * ,
-h3 > br { display: none; } /* br自体は非表示 */
+h3 br + *, h3 > br { display: none; }
 
-/* --- テーブル外枠 --- */
-.container > br {
-  display: none;
+/* --- br非表示 --- */
+.container > br { display: none; }
+
+/* --- status --- */
+#status {
+  font-size: 0.8em;
+  color: gray;
+  margin: 0 16px 8px;
 }
 
+/* --- テーブル外枠 --- */
 table {
   width: calc(100% - 32px);
   margin: 0 16px;
@@ -110,63 +113,55 @@ thead tr {
 }
 
 table th {
-  padding: 10px 10px;
+  padding: 10px;
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
   font-size: 0.78rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.75);
-  text-align: left;
+  text-align: center;
   border-bottom: none;
   white-space: nowrap;
 }
 
-/* 列幅バランス */
-table th:nth-child(1),
-table td:nth-child(1) { width: 48px;  text-align: center; }
-
-table th:nth-child(2),
-table td:nth-child(2) { width: auto;  text-align: center; }
-
-table th:nth-child(3),
-table td:nth-child(3) { width: 60px;  text-align: center; }
-
-table th:nth-child(4),
-table td:nth-child(4) { width: 90px;  text-align: center; }
-
-/* th 全体も中央揃え */
-table th { text-align: center; }
-
 /* --- データ行 --- */
-table tbody tr {
+tbody tr {
+  background: var(--bg);
   border-bottom: 1px solid var(--surface-2);
   transition: background 0.12s;
 }
 
-table tbody tr:last-child {
+tbody tr:last-child {
   border-bottom: none;
 }
 
-table tbody tr:hover {
+tbody tr:hover {
   background: var(--surface);
 }
 
+/* --- セル共通 --- */
 table td {
-  padding: 10px 10px;
+  padding: 10px;
   font-size: 0.88rem;
   color: var(--text);
   vertical-align: middle;
 }
 
-table td {
-  padding: 10px 10px;
-  font-size: 0.88rem;
-  color: var(--text);
-  vertical-align: middle;
-}
+/* --- 列幅・揃え --- */
+table th:nth-child(1),
+table td:nth-child(1) { width: 48px; text-align: center; }
 
-/* --- RANK 表示 --- */
+table th:nth-child(2),
+table td:nth-child(2) { width: auto; text-align: center; }
+
+table th:nth-child(3),
+table td:nth-child(3) { width: 60px; text-align: center; }
+
+table th:nth-child(4),
+table td:nth-child(4) { width: 90px; text-align: center; }
+
+/* --- RANK --- */
 table td:nth-child(1) {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
@@ -178,7 +173,6 @@ table td:nth-child(1) {
 table td:nth-child(2) {
   font-weight: 700;
   font-size: 0.9rem;
-  text-align: center;
 }
 
 /* --- Point --- */
@@ -189,7 +183,7 @@ table td:nth-child(3) {
   color: var(--text);
 }
 
-/* --- Details（ZT表示） --- */
+/* --- Details --- */
 table td:nth-child(4) {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
@@ -210,6 +204,8 @@ table td:nth-child(4) {
     font-size: 1.3rem;
     margin: 14px 12px 12px;
   }
+
+  #status { margin: 0 12px 8px; }
 
   table {
     width: calc(100% - 24px);
