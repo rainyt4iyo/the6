@@ -441,38 +441,26 @@ def monitor(grade):
         grade_list = ["F5M", "F5W", "O5M", "O5W"]
     elif grade == 6:
         grade_list = ["F6M", "F6W", "O6M", "O6W"]
+'''
 
-    big_data = []
-    for class_name in grade_list:
-        with db_connection() as conn:
-            with conn.cursor() as cursor:
-                sql = "SELECT * FROM result WHERE class=%s"
-                cursor.execute(sql, (class_name,))
-                results = cursor.fetchall()
-        print(results)
 
-        with db_connection() as conn:
-            with conn.cursor() as cursor:
-                sql = "SELECT * FROM player WHERE class=%s"
-                cursor.execute(sql, (class_name,))
-                players= cursor.fetchall()
-        print(players)
-        big_data.append([results, players])
-
+def calc_players(results, players_raw):
+    """resultsとplayers_rawからポイント計算済みのplayersリストを返す共通関数"""
     temp_point_list = []
-    for n in range(1, 19):     
+    for n in range(1, 19):
         count = sum(1 for row in results if str(row.get('kid')) == str(n) and row.get('zt') == 2)
         point = round(BASE_POINT / count, 2) if count > 0 else BASE_POINT
         temp_point_list.append(point)
 
+    players = list(players_raw)  # コピー
+
     pid_list = list(set(row['pid'] for row in results if 'pid' in row))
-    print(pid_list)
 
     for pid in pid_list:
         player_results = [row for row in results if row.get('pid') == pid]
         player_point = 0
-        top_list = []    # ← ループの外に移動
-        zone_list = []   # ← ループの外に移動
+        top_list = []
+        zone_list = []
 
         for player_result in player_results:
             kid = player_result.get('kid')
@@ -485,45 +473,51 @@ def monitor(grade):
                 player_point += 1
                 zone_list.append(int(kid))
 
-        player_detail = {'top': top_list, 'zone': zone_list}  # ← 変わらずループ外でOK
+        player_detail = {'top': top_list, 'zone': zone_list}
 
         for p in players:
             if p.get('pid') == pid:
                 p['point'] = round(player_point, 2)
                 p['detail'] = player_detail
                 break
-        
-        for p in players:
-            if 'detail' not in p:
-                p['detail'] = {'top': [], 'zone': []}
-            if 'point' not in p:
-                p['point'] = 0
 
+    for p in players:
+        if 'detail' not in p:
+            p['detail'] = {'top': [], 'zone': []}
+        if 'point' not in p:
+            p['point'] = 0
 
     players.sort(key=lambda x: x.get('point', 0), reverse=True)
     for i, player in enumerate(players):
         current_point = player.get('point', 0)
-        
         if i > 0 and current_point == players[i-1].get('point', 0):
-            # 直前のプレイヤーと同点なら、同じ順位にする
             player['rank'] = players[i-1]['rank']
         else:
-            # 同点でないなら、現在の「順番（インデックス + 1）」を順位にする
             player['rank'] = i + 1
-    
-    print(players)
-    print(temp_point_list)
 
-    tag = ["A1", "A2", "B1", "B2", "C1", "C2", "D1", "D2", "E1", "E2", "F1", "F2", "G1", "G2", "H1", "H2", "I1", "I2"]
-
-    return render_template('testapp/realtimeresult.html', results=results, players=players, temp_point_list=temp_point_list, class_name=class_name, tag=tag)
+    return players, temp_point_list
 
 
-# ★ SSE用の新しいエンドポイントを追加
-@app.route('/monitor/<grade>/stream')
-def monior_stream(class_name):
-    def get_data():
-        """DBからデータを取得してプレイヤーリストを返す"""
+@app.route('/monitor/<grade>')
+def monitor(grade):
+    grade = int(grade)
+    if grade == 1:
+        grade_list = ["F1", "O1"]
+    elif grade == 2:
+        grade_list = ["F2", "O2"]
+    elif grade == 3:
+        grade_list = ["F3", "O3"]
+    elif grade == 4:
+        grade_list = ["F4", "O4M", "O4W"]
+    elif grade == 5:
+        grade_list = ["F5M", "F5W", "O5M", "O5W"]
+    elif grade == 6:
+        grade_list = ["F6M", "F6W", "O6M", "O6W"]
+    else:
+        grade_list = []
+
+    classes_data = []
+    for class_name in grade_list:
         with db_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("SELECT * FROM result WHERE class=%s", (class_name,))
@@ -532,83 +526,84 @@ def monior_stream(class_name):
         with db_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("SELECT * FROM player WHERE class=%s", (class_name,))
-                players = cursor.fetchall()
+                players_raw = cursor.fetchall()
 
-        temp_point_list = []
-        for n in range(1, 19):
-            count = sum(1 for row in results if str(row.get('kid')) == str(n) and row.get('zt') == 2)
-            point = round(BASE_POINT / count, 2) if count > 0 else BASE_POINT
-            temp_point_list.append(point)
+        players, temp_point_list = calc_players(results, players_raw)
 
-        pid_list = list(set(row['pid'] for row in results if 'pid' in row))
+        classes_data.append({
+            'class_name': class2japanese(class_name),
+            'players': players,
+            'temp_point_list': temp_point_list,
+        })
 
-        for pid in pid_list:
-            player_results = [row for row in results if row.get('pid') == pid]
-            player_point = 0
-            top_list = []   # ★ ループ外に移動
-            zone_list = []  # ★ ループ外に移動
+    return render_template(
+        'testapp/monitor.html',
+        grade=grade,
+        grade_list=grade_list,
+        classes_data=classes_data,
+    )
 
-            for player_result in player_results:
-                kid = player_result.get('kid')
-                zt = player_result.get('zt')
-                if kid is not None and zt == 2:
-                    player_point += temp_point_list[int(kid) - 1]
-                    player_point += 1
-                    top_list.append(int(kid))   # ★ 追加
-                elif kid is not None and zt == 1:
-                    player_point += 1
-                    zone_list.append(int(kid))  # ★ 追加
 
-            player_detail = {'top': top_list, 'zone': zone_list}  # ★ 追加
+# SSEエンドポイント（monitor用）
+@app.route('/monitor/<grade>/stream')
+def monitor_stream(grade):
+    grade = int(grade)
+    if grade == 1:
+        grade_list = ["F1", "O1"]
+    elif grade == 2:
+        grade_list = ["F2", "O2"]
+    elif grade == 3:
+        grade_list = ["F3", "O3"]
+    elif grade == 4:
+        grade_list = ["F4", "O4M", "O4W"]
+    elif grade == 5:
+        grade_list = ["F5M", "F5W", "O5M", "O5W"]
+    elif grade == 6:
+        grade_list = ["F6M", "F6W", "O6M", "O6W"]
+    else:
+        grade_list = []
 
-            for p in players:
-                if p.get('pid') == pid:
-                    p['point'] = round(player_point, 2)  # ★ round追加
-                    p['detail'] = player_detail           # ★ 追加
-                    break
+    def get_data():
+        classes_data = []
+        for class_name in grade_list:
+            with db_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT * FROM result WHERE class=%s", (class_name,))
+                    results = cursor.fetchall()
 
-        # ★ ポイント未計算プレイヤーへのデフォルト値設定
-        for p in players:
-            if 'detail' not in p:
-                p['detail'] = {'top': [], 'zone': []}
-            if 'point' not in p:
-                p['point'] = 0
+            with db_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT * FROM player WHERE class=%s", (class_name,))
+                    players_raw = cursor.fetchall()
 
-        players.sort(key=lambda x: x.get('point', 0), reverse=True)
-        for i, player in enumerate(players):
-            current_point = player.get('point', 0)
-            if i > 0 and current_point == players[i-1].get('point', 0):
-                player['rank'] = players[i-1]['rank']
-            else:
-                player['rank'] = i + 1
+            players, temp_point_list = calc_players(results, players_raw)
 
-        return players, temp_point_list
-
+            classes_data.append({
+                'class_name': class_name,
+                'players': players,
+                'temp_point_list': temp_point_list,
+            })
+        return classes_data
 
     def event_stream():
         last_data = None
         while True:
             try:
-                players, temp_point_list = get_data()
-                # シリアライズして前回と比較（変化があった時だけ送信）
-                current_data = json.dumps(players, ensure_ascii=False, default=str)
+                classes_data = get_data()
+                current_data = json.dumps(classes_data, ensure_ascii=False, default=str)
                 if current_data != last_data:
                     last_data = current_data
-                    payload = json.dumps({
-                        'players': players,
-                        'temp_point_list': temp_point_list
-                    }, ensure_ascii=False, default=str)
-                    yield f"data: {payload}\n\n"
+                    yield f"data: {current_data}\n\n"
             except Exception as e:
-                print(f"SSE error: {e}")
+                print(f"SSE monitor error: {e}")
                 yield f"data: {json.dumps({'error': str(e)})}\n\n"
-            time.sleep(3)  # ★ 3秒ごとにDBを確認
+            time.sleep(3)
 
     return Response(
         stream_with_context(event_stream()),
         mimetype='text/event-stream',
         headers={
             'Cache-Control': 'no-cache',
-            'X-Accel-Buffering': 'no'  # Nginxを使う場合に必要
+            'X-Accel-Buffering': 'no'
         }
-    )'''
+    )

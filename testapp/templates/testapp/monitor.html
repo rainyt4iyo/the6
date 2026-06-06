@@ -1,234 +1,110 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/monitor.css') }}"/>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <title>THE|6</title>
-    <style>
-        #status {
-            font-size: 0.8em;
-            color: gray;
-            margin: 0 16px 8px;
-        }
-
-        .popup-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.55);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .popup-overlay:target {
-            display: flex;
-        }
-        .popup {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 20px;
-            width: 90%;
-            max-width: 360px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-        }
-        .popup-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-        .popup-title {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: 0.05em;
-            color: #1a1d27;
-        }
-        .popup-close {
-            font-size: 1.3rem;
-            color: #6b7080;
-            text-decoration: none;
-            line-height: 1;
-        }
-        .popup-close:hover {
-            color: #1a1d27;
-        }
-        .popup-legend {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 12px;
-            font-size: 0.78rem;
-            color: #6b7080;
-        }
-        .legend-dot {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-            margin-right: 4px;
-            vertical-align: middle;
-        }
-        .legend-dot-top  { background: #4a9eff !important; }
-        .legend-dot-zone { background: #2ecc9a !important; }
-        .legend-dot-none { background: #eaecf0 !important; border: 1px solid #d8dce6 !important; }
-
-        .problem-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 6px;
-        }
-
-        .popup .problem-grid .pcell {
-            aspect-ratio: 1 !important;
-            border-radius: 6px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            font-family: 'Barlow Condensed', sans-serif !important;
-            font-weight: 700 !important;
-            font-size: 0.85rem !important;
-            background: #eaecf0 !important;
-            color: #6b7080 !important;
-            border: 1px solid #d8dce6 !important;
-            box-sizing: border-box !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            width: 100% !important;
-        }
-        .popup .problem-grid .pcell.is-top {
-            background: #4a9eff !important;
-            color: #ffffff !important;
-            border-color: #4a9eff !important;
-        }
-        .popup .problem-grid .pcell.is-zone {
-            background: #9ae7ff !important;
-            color: #ffffff !important;
-            border-color: #9ae2ff !important;
-        }
-
-        .btn-detail {
-            display: inline-block;
-            background: none;
-            border: 1px solid #d8dce6;
-            border-radius: 6px;
-            padding: 3px 10px;
-            font-size: 0.78rem;
-            cursor: pointer;
-            color: #6b7080;
-            font-family: 'Noto Sans JP', sans-serif;
-            text-decoration: none;
-        }
-        .btn-detail:hover {
-            background: #f4f5f7;
-        }
-    </style>
+    <title>THE|6 MONITOR — GRADE {{ grade }}</title>
 </head>
 <body>
-    <div class="container">
-        <img class="header" src="/static/images/banner_1280p.png">
-        <br>
-        <h3>リアルタイムリザルト <br> Live Results</h3>
-        <p id="status">接続中...</p>
+    <header class="page-header">
+        <img class="header-banner" src="/static/images/banner_1280p.png" alt="THE|6">
+        <div class="header-meta">
+            <span class="header-title">LIVE RESULTS</span>
+            <span class="header-grade">GRADE {{ grade }}</span>
+            <span id="status" class="status">接続中...</span>
+        </div>
+    </header>
 
-        <table id="result-table">
-            <thead>
-                <tr>
-                    <th>RANK</th>
-                    <th>Name</th>
-                    <th>Point</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody id="result-body">
-            </tbody>
-        </table>
-    </div>
-
-    <!-- ポップアップはJS側で動的に生成 -->
-    <div id="popup-container"></div>
+    <main id="monitor-grid" class="monitor-grid">
+        {% for cls in classes_data %}
+        <section class="ranking-panel" id="panel-{{ cls.class_name }}">
+            <h2 class="panel-title">{{ cls.class_name }}</h2>
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th>RANK</th>
+                        <th>No</th>
+                        <th>NAME</th>
+                        <th>PT</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-{{ cls.class_name }}">
+                    {% for player in cls.players %}
+                    <tr>
+                        <td class="col-rank rank-{{ player.rank }}">{{ player.rank }}</td>
+                        <td class="col-pid">{{ player.pid }}</td>
+                        <td class="col-name">{{ player.name }}</td>
+                        <td class="col-point">{{ player.point }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        {% endfor %}
+    </main>
 
     <script>
-        const className = "{{ class_name }}";
-        const statusEl  = document.getElementById('status');
-        const tbody     = document.getElementById('result-body');
-        const popupContainer = document.getElementById('popup-container');
+        const grade      = {{ grade }};
+        const gradeList  = {{ grade_list | tojson }};
+        const statusEl   = document.getElementById('status');
 
-        const tag = ["A1","A2","B1","B2","C1","C2","D1","D2","E1","E2",
-                     "F1","F2","G1","G2","H1","H2","I1","I2"];
+        // 初期データ（Jinja2からそのまま受け取る）
+        const initialData = {{ classes_data | tojson }};
 
-        function renderPlayers(players) {
-            // テーブル更新
-            tbody.innerHTML = players.map(player => `
+        function renderClass(cls) {
+            const tbody = document.getElementById(`tbody-${cls.class_name}`);
+            if (!tbody) return;
+            tbody.innerHTML = cls.players.map(p => `
                 <tr>
-                    <td>${player.rank}</td>
-                    <td>${player.name}</td>
-                    <td>${player.point ?? 0}</td>
-                    <td><a class="btn-detail" href="#popup-${player.pid}">詳細</a></td>
+                    <td class="col-rank rank-${p.rank}">${p.rank}</td>
+                    <td class="col-pid">${p.pid}</td>
+                    <td class="col-name">${p.name}</td>
+                    <td class="col-point">${p.point ?? 0}</td>
                 </tr>
             `).join('');
+        }
 
-            // ポップアップ更新
-            popupContainer.innerHTML = players.map(player => {
-                const topList  = (player.detail && player.detail.top)  || [];
-                const zoneList = (player.detail && player.detail.zone) || [];
-
-                const cells = tag.map((label, i) => {
-                    const n = i + 1;
-                    let cls = 'pcell';
-                    if (topList.map(Number).includes(n))       cls += ' is-top';
-                    else if (zoneList.map(Number).includes(n)) cls += ' is-zone';
-                    return `<div class="${cls}">${label}</div>`;
-                }).join('');
-
-                return `
-                    <div class="popup-overlay" id="popup-${player.pid}">
-                        <div class="popup">
-                            <div class="popup-header">
-                                <span class="popup-title">${player.name}</span>
-                                <a class="popup-close" href="#">✕</a>
-                            </div>
-                            <div class="popup-legend">
-                                <span><span class="legend-dot legend-dot-top"></span>TOP</span>
-                                <span><span class="legend-dot legend-dot-zone"></span>ZONE</span>
-                                <span><span class="legend-dot legend-dot-none"></span>未登録</span>
-                            </div>
-                            <div class="problem-grid">${cells}</div>
-                        </div>
-                    </div>`;
-            }).join('');
+        function renderAll(classesData) {
+            classesData.forEach(cls => renderClass(cls));
         }
 
         function connectSSE() {
-            const es = new EventSource(`/realtimeresult/${className}/stream`);
+            const es = new EventSource(`/monitor/${grade}/stream`);
 
             es.onopen = () => {
                 statusEl.textContent = '🟢 ライブ更新中';
+                statusEl.className = 'status status-live';
             };
 
             es.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                if (data.error) { console.error('Server error:', data.error); return; }
+                if (data.error) { console.error('SSE error:', data.error); return; }
 
-                renderPlayers(data.players);
+                renderAll(data);
 
                 const now = new Date().toLocaleTimeString('ja-JP');
-                statusEl.textContent = `🟢 ライブ更新中　最終更新: ${now}`;
+                statusEl.textContent = `🟢 ライブ更新中　${now}`;
+                statusEl.className = 'status status-live';
             };
 
             es.onerror = () => {
-                statusEl.textContent = '🔴 接続エラー。再接続中...';
+                statusEl.textContent = '🔴 再接続中...';
+                statusEl.className = 'status status-error';
                 es.close();
                 setTimeout(connectSSE, 5000);
             };
         }
 
-        // 初期表示（SSE接続前にJinja2側のデータで即時描画）
-        const initialPlayers = {{ players | tojson }};
-        renderPlayers(initialPlayers);
+        // グリッド列数をクラス数に合わせて自動設定
+        const grid = document.getElementById('monitor-grid');
+        const colCount = gradeList.length;
+        grid.classList.add(`cols-${colCount}`);
 
+        // 初期描画
+        renderAll(initialData);
         connectSSE();
     </script>
 </body>
