@@ -64,8 +64,8 @@ CREATE TABLE IF NOT EXISTS finalresult (
     pid INT, 
     class VARCHAR(255), 
     kid VARCHAR(255), 
-    zt INT, 
-    trynum INT,
+    zone INT
+    top INT
     UNIQUE(pid, class, kid)
 )
 """
