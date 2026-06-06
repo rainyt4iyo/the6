@@ -147,31 +147,15 @@ table td {
 }
 
 /* ============================================
-   【変更】nth-child を維持した列幅の最小化・自動化
+   【完全版】列幅の最適化 ＆ カッコいいフォント設定の融合
    ============================================ */
-/* 1つ目: RANK (指定幅をキープ) */
+
+/* 1つ目: RANK (固定幅 ＆ 太字Barlow) */
 table th:nth-child(1),
-table td:nth-child(1) { width: 48px; text-align: center; }
-
-/* 2つ目: PID (最小限に縮める) */
-table th:nth-child(2),
-table td:nth-child(2) { width: 1px; white-space: nowrap; text-align: center; }
-
-/* 3つ目: Name (残りの全領域をここで確保する) */
-table th:nth-child(3),
-table td:nth-child(3) { width: auto; text-align: center; }
-
-/* 4つ目: Point (最小限に縮める) */
-table th:nth-child(4),
-table td:nth-child(4) { width: 1px; white-space: nowrap; text-align: center; }
-
-/* 5つ目: Details (詳細ボタン幅の最小限に縮める) */
-table th:nth-child(5),
-table td:nth-child(5) { width: 1px; white-space: nowrap; text-align: center; }
-
-
-/* --- スタイル・フォントの割り当て --- */
-/* RANK */
+table td:nth-child(1) {
+  width: 48px;
+  text-align: center;
+}
 table td:nth-child(1) {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
@@ -179,20 +163,42 @@ table td:nth-child(1) {
   color: var(--text-sub);
 }
 
-/* PID */
+/* 2つ目: PID (最小化 ＆ 細身Barlow) */
+table th:nth-child(2),
+table td:nth-child(2) {
+  width: 1px;
+  white-space: nowrap;
+  text-align: center;
+}
 table td:nth-child(2) {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
   color: var(--text-sub);
 }
 
-/* Name */
+/* 3つ目: Name (幅最大化 ＆ 太字日本語フォント ＆ 左寄せで美しく) */
+table th:nth-child(3) {
+  text-align: left;
+  padding-left: 12px;
+}
 table td:nth-child(3) {
+  width: 100%;
+  min-width: 140px;
+  text-align: left;
+  padding-left: 12px;
+  word-break: break-word;
+  font-family: 'Noto Sans JP', sans-serif;
   font-weight: 700;
   font-size: 0.9rem;
 }
 
-/* Point */
+/* 4つ目: Point (最小化 ＆ 目立つBarlow) */
+table th:nth-child(4),
+table td:nth-child(4) {
+  width: 1px;
+  white-space: nowrap;
+  text-align: center;
+}
 table td:nth-child(4) {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
@@ -200,7 +206,13 @@ table td:nth-child(4) {
   color: var(--text);
 }
 
-/* Details */
+/* 5つ目: Details (最小化 ＆ 詳細ボタン用Barlow) */
+table th:nth-child(5),
+table td:nth-child(5) {
+  width: 1px;
+  white-space: nowrap;
+  text-align: center;
+}
 table td:nth-child(5) {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
@@ -231,7 +243,13 @@ table td:nth-child(5) {
   table th { padding: 9px 6px; font-size: 0.72rem; }
   table td { padding: 9px 6px; font-size: 0.83rem; }
 
-  /* スマホ版でもRANKだけ少し詰め、残りは1pxハックに任せて自動で最小化されます */
+  /* スマホ版の幅微調整 */
   table th:nth-child(1),
   table td:nth-child(1) { width: 38px; }
+
+  table th:nth-child(3) { padding-left: 8px; }
+  table td:nth-child(3) {
+    min-width: 110px;
+    padding-left: 8px;
+  }
 }
