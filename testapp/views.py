@@ -579,21 +579,18 @@ def monitor_stream(grade):
             players, temp_point_list = calc_players(results, players_raw)
 
             classes_data.append({
-                'class_name': class_name,
+                'class_name': class2japanese(class_name),
                 'players': players,
                 'temp_point_list': temp_point_list,
             })
         return classes_data
 
     def event_stream():
-        last_data = None
         while True:
             try:
                 classes_data = get_data()
-                current_data = json.dumps(classes_data, ensure_ascii=False, default=str)
-                if current_data != last_data:
-                    last_data = current_data
-                    yield f"data: {current_data}\n\n"
+                payload = json.dumps(classes_data, ensure_ascii=False, default=str)
+                yield f"data: {payload}\n\n"  # ★ 変化チェックを削除 → 毎回必ず送信
             except Exception as e:
                 print(f"SSE monitor error: {e}")
                 yield f"data: {json.dumps({'error': str(e)})}\n\n"
