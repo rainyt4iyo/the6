@@ -83,8 +83,6 @@ h3::before {
 }
 
 h3 br + *, h3 > br { display: none; }
-
-/* --- br非表示 --- */
 .container > br { display: none; }
 
 /* --- status --- */
@@ -148,57 +146,74 @@ table td {
   vertical-align: middle;
 }
 
-/* --- 列幅・揃え --- */
-table th:nth-child(1), table td:nth-child(1) { width: 48px; text-align: center; }
-        table th:nth-child(2), table td:nth-child(2) { width: 54px; text-align: center; } /* PID列の追加 */
-        table th:nth-child(3), table td:nth-child(3) { width: auto; text-align: center; } /* Name列 (2から3へシフト) */
-        table th:nth-child(4), table td:nth-child(4) { width: 60px; text-align: center; } /* Point列 (3から4へシフト) */
-        table th:nth-child(5), table td:nth-child(5) { width: 90px; text-align: center; } /* Details列 (4から5へシフト) */
+/* ============================================
+   【変更】nth-child を維持した列幅の最小化・自動化
+   ============================================ */
+/* 1つ目: RANK (指定幅をキープ) */
+table th:nth-child(1),
+table td:nth-child(1) { width: 48px; text-align: center; }
 
-        /* --- RANK (1つ目) --- */
-        table td:nth-child(1) {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-weight: 800;
-          font-size: 1.05rem;
-          color: var(--text-sub);
-        }
+/* 2つ目: PID (最小限に縮める) */
+table th:nth-child(2),
+table td:nth-child(2) { width: 1px; white-space: nowrap; text-align: center; }
 
-        /* --- 【新規】PID (2つ目) --- */
-        table td:nth-child(2) {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-weight: 600;
-          color: var(--text-sub);
-        }
+/* 3つ目: Name (残りの全領域をここで確保する) */
+table th:nth-child(3),
+table td:nth-child(3) { width: auto; text-align: center; }
 
-        /* --- Name (3つ目) --- */
-        table td:nth-child(3) {
-          font-weight: 700;
-          font-size: 0.9rem;
-        }
+/* 4つ目: Point (最小限に縮める) */
+table th:nth-child(4),
+table td:nth-child(4) { width: 1px; white-space: nowrap; text-align: center; }
 
-        /* --- Point (4つ目) --- */
-        table td:nth-child(4) {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-weight: 700;
-          font-size: 1.1rem;
-          color: var(--text);
-        }
+/* 5つ目: Details (詳細ボタン幅の最小限に縮める) */
+table th:nth-child(5),
+table td:nth-child(5) { width: 1px; white-space: nowrap; text-align: center; }
 
-        /* --- Details (5つ目) --- */
-        table td:nth-child(5) {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-weight: 700;
-          font-size: 0.85rem;
-          letter-spacing: 0.05em;
-          color: var(--text-sub);
-        }
+
+/* --- スタイル・フォントの割り当て --- */
+/* RANK */
+table td:nth-child(1) {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--text-sub);
+}
+
+/* PID */
+table td:nth-child(2) {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+
+/* Name */
+table td:nth-child(3) {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Point */
+table td:nth-child(4) {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+/* Details */
+table td:nth-child(5) {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--text-sub);
+}
 
 /* ============================================
    スマートフォン最適化（〜480px）
    ============================================ */
 @media (max-width: 480px) {
   .container { max-width: 100%; }
-
   .header { max-height: 90px; }
 
   h3 {
@@ -213,15 +228,10 @@ table th:nth-child(1), table td:nth-child(1) { width: 48px; text-align: center; 
     margin: 0 12px;
   }
 
-  table th { padding: 9px 8px; font-size: 0.72rem; }
-  table td { padding: 9px 8px; font-size: 0.83rem; }
+  table th { padding: 9px 6px; font-size: 0.72rem; }
+  table td { padding: 9px 6px; font-size: 0.83rem; }
 
+  /* スマホ版でもRANKだけ少し詰め、残りは1pxハックに任せて自動で最小化されます */
   table th:nth-child(1),
   table td:nth-child(1) { width: 38px; }
-
-  table th:nth-child(3),
-  table td:nth-child(3) { width: 50px; }
-
-  table th:nth-child(4),
-  table td:nth-child(4) { width: 76px; }
 }
