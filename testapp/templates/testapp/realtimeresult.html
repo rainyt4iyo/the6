@@ -137,7 +137,6 @@
             <thead>
                 <tr>
                     <th>RANK</th>
-                    <th>No.</th>
                     <th>Name</th>
                     <th>Point</th>
                     <th>Details</th>
@@ -165,7 +164,6 @@
             tbody.innerHTML = players.map(player => `
                 <tr>
                     <td>${player.rank}</td>
-                    <td>${player.pid}</td>
                     <td>${player.name}</td>
                     <td>${player.point ?? 0}</td>
                     <td><a class="btn-detail" href="#popup-${player.pid}">詳細</a></td>
