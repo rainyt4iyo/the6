@@ -559,7 +559,7 @@ def monitor_stream(grade):
     elif grade == 5:
         grade_list = ["F5M", "F5W", "O5M", "O5W"]
     elif grade == 6:
-        grade_list = ["F6M", "F6W", "O6M", "O6W"]
+        grade_list = ["O6M", "O6W"]
     else:
         grade_list = []
 
